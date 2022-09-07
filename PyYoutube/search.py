@@ -1,16 +1,22 @@
-from base import YOUTUBE
+
 from pprint import PrettyPrinter
+from googleapiclient.discovery import build
+from decouple import config
+
+YOUTUBE_API_KEY = config("API_KEY")
 pp = PrettyPrinter()
 
 class PyYoutubeSearch:
-    def __init__(self,query:str):
+    def __init__(self,query:str, youtube_api_key:str):
         self.query = query # search quary
+
+        self.YOUTUBE = build('youtube', 'v3', developerKey=youtube_api_key)
         
     def get_all(self,
                 max_Result:int=5, # max result returned with a minimum of 5 results and a maximum of 50 results
                 ):
 
-        search = YOUTUBE.search().list(q=self.query, part='snippet',
+        search = self.YOUTUBE.search().list(q=self.query, part='snippet',
          type=['channel','video','playlist'],
           maxResults=max_Result)
 
@@ -22,7 +28,7 @@ class PyYoutubeSearch:
                     max_Result:int=5, # max result returned with a minimum of 5 results and a maximum of 50 results
                     ):
         # search_type is a list of strings eg. ['channel', 'video', 'playlist]
-        search = YOUTUBE.search().list(q=self.query, part='snippet', type=search_type, maxResults=max_Result)
+        search = self.YOUTUBE.search().list(q=self.query, part='snippet', type=search_type, maxResults=max_Result)
         response = search.execute()
         return response
 
@@ -35,7 +41,7 @@ class PyYoutubeSearch:
         #  channelType   Acceptable values are:
         #     any – Return all channels.
         #     show – Only retrieve shows.
-        search = YOUTUBE.search().list(q=self.query,
+        search = self.YOUTUBE.search().list(q=self.query,
                     part='snippet',
                     type='channel',
                     channelType=channelType,
@@ -123,7 +129,7 @@ class PyYoutubeSearch:
         #     viewCount: – Resources are sorted from highest to lowest number of views. For live broadcasts,
         #                videos are sorted by number of concurrent viewers while the broadcasts are ongoing.
 
-        search = YOUTUBE.search().list(q=self.query,
+        search = self.YOUTUBE.search().list(q=self.query,
                     part='snippet',
                     type='video',
                     maxResults=max_Result,
@@ -143,13 +149,13 @@ class PyYoutubeSearch:
         return response
 
     def get_playlist(self, max_Result:int=5):
-        search = YOUTUBE.search().list(q=self.query, part='snippet', type='playlist',maxResults= max_Result,)
+        search = self.YOUTUBE.search().list(q=self.query, part='snippet', type='playlist',maxResults= max_Result,)
         response = search.execute()
         return response
 
     def download(self):
         pass
 
-tub = PyYoutubeSearch('python')
+tub = PyYoutubeSearch('python',youtube_api_key=YOUTUBE_API_KEY)
 pp.pprint(tub.get_playlist())
 
