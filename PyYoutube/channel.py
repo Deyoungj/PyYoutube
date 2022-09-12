@@ -1,3 +1,4 @@
+from urllib import response
 from googleapiclient.discovery import build
 from decouple import config
 
@@ -23,4 +24,24 @@ class PyYoutubeChannel:
          'statistics','status','topicDetails']).execute()
         return response
 
+    def get_channel_videos(self, channelId:str):
+        response = self.YOUTUBE.channels().list(id=channelId, part=['contentDetails'],)
+        play_list_id = response['items'][0]['contentDetails']['relatedPlaylists']['uploads']
+
+        videos = []
+        next_page_token = None
+        
+        while True:
+            res = self.YOUTUBE.playlistItems().list(part='snippet', playlistId=play_list_id,
+                pageToken=next_page_token, maxResults=50)
+
+            videos += res['items']
+            next_page_token = res['nextPageToken']
+            if next_page_token == None:
+                break
+
+            return videos
+
+
+tub = PyYoutubeChannel(youtube_api_key=config("API_KEY"))
 
